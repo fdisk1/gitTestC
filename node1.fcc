@@ -117,8 +117,10 @@ systemd:
       enabled: true
       contents: |
           [Unit]
-          Requires=network-online.target
+          Requires=NetworkManager.service
+          After=NetworkManager.service
           After=network-online.target
+          Before=network-online.target
           Before=sshd.service
           [Service]
           Type=oneshot
