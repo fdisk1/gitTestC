@@ -82,6 +82,9 @@ storage:
           [ipv4]
           address1=192.168.56.11/24,192.168.56.1
           method=manual
+    # 設定台北時間
+    - path: /etc/localtime
+      target: ../usr/share/zoneinfo/Asia/Taipei
 systemd:
   units:
     - name: python3-for-ansible.service
