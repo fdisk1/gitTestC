@@ -14,7 +14,7 @@ storage:
     - path: /etc/hostname
       overwrite: true
       contents:
-        inline: node1.k8s.local
+        inline: master-1
     - path: /etc/hosts
       overwrite: true
       contents:
