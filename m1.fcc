@@ -53,20 +53,11 @@ storage:
           [connection]
           id=k8s-eth0
           type=ethernet
-          autoconnect-priority=-999
           interface-name=eth0
-
-          [ethernet]
 
           [ipv4]
           dns=172.29.32.1;8.8.8.8;8.8.4.4;
           method=auto
-
-          [ipv6]
-          addr-gen-mode=default
-          method=auto
-
-          [proxy]
     - path: '/etc/NetworkManager/system-connections/Wired connection 2.nmconnection'
       mode: 0600
       contents:
@@ -74,20 +65,11 @@ storage:
           [connection]
           id=k8s-eth1
           type=ethernet
-          autoconnect-priority=-999
           interface-name=eth1
-
-          [ethernet]
 
           [ipv4]
           address1=172.17.56.11/24,172.17.56.1
-          method=auto
-
-          [ipv6]
-          addr-gen-mode=default
-          method=auto
-
-          [proxy]
+          method=manual
     - path: '/etc/NetworkManager/system-connections/Wired connection 3.nmconnection'
       mode: 0600
       contents:
@@ -95,17 +77,30 @@ storage:
           [connection]
           id=k8s-eth2
           type=ethernet
-          autoconnect-priority=-999
           interface-name=eth2
-
-          [ethernet]
 
           [ipv4]
           address1=192.168.56.11/24,192.168.56.1
-          method=auto
-
-          [ipv6]
-          addr-gen-mode=default
-          method=auto
-
-          [proxy]
+          method=manual
+systemd:
+  units:
+    - name: python3-for-ansible.service
+      enabled: true
+      contents: |
+          [Unit]
+          Description=python3-for-ansible.service
+          After=network-online.target
+          Wants=network-online.target
+          Before=sshd.service
+          [Service]
+          TimeoutStartSec=0
+          Type=oneshot
+          ExecCondition=/usr/bin/test ! -f /etc/python3-for-ansible.done
+          ExecStart=/usr/bin/sed -i '/\\[updates\\]/,/^\\[/ s/^enabled=.*$/enabled=0/' /etc/yum.repos.d/fedora-updates.repo
+          ExecStart=/usr/bin/rpm-ostree install python3 libselinux-python3
+          ExecStart=/usr/bin/sed -i '/\\[updates\\]/,/^\\[/ s/^enabled=.*$/enabled=1/' /etc/yum.repos.d/fedora-updates.repo
+          ExecStart=/usr/bin/sed -i '/^\\[updates\\]/a exclude=libxcrypt-compat* mpdecimal* python-pip-wheel* python-setuptools-wheel* python-unversioned-command* python3* python3-libs* python3-selinux*' /etc/yum.repos.d/fedora-updates.repo
+          ExecStartPost=/usr/bin/touch /etc/python3-for-ansible.done
+          ExecStartPost=/usr/sbin/shutdown -r now
+          [Install]
+          WantedBy=multi-user.target
