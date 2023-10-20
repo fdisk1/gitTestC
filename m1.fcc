@@ -86,25 +86,3 @@ storage:
     # 設定台北時間
     - path: /etc/localtime
       target: ../usr/share/zoneinfo/Asia/Taipei
-systemd:
-  units:
-    - name: python3-for-ansible.service
-      enabled: true
-      contents: |
-          [Unit]
-          Description=python3-for-ansible.service
-          After=network-online.target
-          Wants=network-online.target
-          Before=sshd.service
-          [Service]
-          TimeoutStartSec=0
-          Type=oneshot
-          ExecCondition=/usr/bin/test ! -f /etc/python3-for-ansible.done
-          ExecStart=/usr/bin/sed -i '/\\[updates\\]/,/^\\[/ s/^enabled=.*$/enabled=0/' /etc/yum.repos.d/fedora-updates.repo
-          ExecStart=/usr/bin/rpm-ostree install python3 libselinux-python3
-          ExecStart=/usr/bin/sed -i '/\\[updates\\]/,/^\\[/ s/^enabled=.*$/enabled=1/' /etc/yum.repos.d/fedora-updates.repo
-          ExecStart=/usr/bin/sed -i '/^\\[updates\\]/a exclude=libxcrypt-compat* mpdecimal* python-pip-wheel* python-setuptools-wheel* python-unversioned-command* python3* python3-libs* python3-selinux*' /etc/yum.repos.d/fedora-updates.repo
-          ExecStartPost=/usr/bin/touch /etc/python3-for-ansible.done
-          ExecStartPost=/usr/sbin/shutdown -r now
-          [Install]
-          WantedBy=multi-user.target

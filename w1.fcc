@@ -53,20 +53,11 @@ storage:
           [connection]
           id=k8s-eth0
           type=ethernet
-          autoconnect-priority=-999
           interface-name=eth0
-
-          [ethernet]
 
           [ipv4]
           dns=172.29.32.1;8.8.8.8;8.8.4.4;
           method=auto
-
-          [ipv6]
-          addr-gen-mode=default
-          method=auto
-
-          [proxy]
     - path: '/etc/NetworkManager/system-connections/Wired connection 2.nmconnection'
       mode: 0600
       contents:
@@ -74,20 +65,11 @@ storage:
           [connection]
           id=k8s-eth1
           type=ethernet
-          autoconnect-priority=-999
           interface-name=eth1
-
-          [ethernet]
 
           [ipv4]
           address1=172.17.56.21/24,172.17.56.1
-          method=auto
-
-          [ipv6]
-          addr-gen-mode=default
-          method=auto
-
-          [proxy]
+          method=manual
     - path: '/etc/NetworkManager/system-connections/Wired connection 3.nmconnection'
       mode: 0600
       contents:
@@ -95,17 +77,12 @@ storage:
           [connection]
           id=k8s-eth2
           type=ethernet
-          autoconnect-priority=-999
           interface-name=eth2
-
-          [ethernet]
 
           [ipv4]
           address1=192.168.56.21/24,192.168.56.1
-          method=auto
-
-          [ipv6]
-          addr-gen-mode=default
-          method=auto
-
-          [proxy]
+          method=manual
+  links:
+    # 設定台北時間
+    - path: /etc/localtime
+      target: ../usr/share/zoneinfo/Asia/Taipei
