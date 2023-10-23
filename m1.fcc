@@ -63,9 +63,9 @@ storage:
       contents:
         inline: |
           [connection]
-          id=k8s-eth2
+          id=k8s-eth1
           type=ethernet
-          interface-name=eth2
+          interface-name=eth1
 
           [ipv4]
           address1=192.168.56.11/24,192.168.56.1
@@ -75,9 +75,9 @@ storage:
       contents:
         inline: |
           [connection]
-          id=k8s-eth1
+          id=k8s-eth2
           type=ethernet
-          interface-name=eth1
+          interface-name=eth2
 
           [ipv4]
           address1=172.17.56.11/24,172.17.56.1
