@@ -63,24 +63,24 @@ storage:
       contents:
         inline: |
           [connection]
-          id=k8s-eth1
-          type=ethernet
-          interface-name=eth1
-
-          [ipv4]
-          address1=172.17.56.12/24,172.17.56.1
-          method=manual
-    - path: '/etc/NetworkManager/system-connections/Wired connection 3.nmconnection'
-      mode: 0600
-      contents:
-        inline: |
-          [connection]
           id=k8s-eth2
           type=ethernet
           interface-name=eth2
 
           [ipv4]
           address1=192.168.56.12/24,192.168.56.1
+          method=manual
+    - path: '/etc/NetworkManager/system-connections/Wired connection 3.nmconnection'
+      mode: 0600
+      contents:
+        inline: |
+          [connection]
+          id=k8s-eth1
+          type=ethernet
+          interface-name=eth1
+
+          [ipv4]
+          address1=172.17.56.12/24,172.17.56.1
           method=manual
   links:
     # 設定台北時間
