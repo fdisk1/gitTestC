@@ -77,6 +77,9 @@ storage:
 
           # 負載平衡器
           192.168.56.30   loadbalancer
+    # 打開 IPv6
+    # 雷坑: Thx, i fix it with:
+    # 參考網址: https://github.com/cri-o/cri-o/issues/3555
     - path: /etc/sysctl.d/10-disable-ipv6.conf
       contents:
         inline: |
