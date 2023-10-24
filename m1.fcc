@@ -11,6 +11,49 @@ passwd:
         - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDF2i8CY1Z8nTJErervMuyu3Ol0pmIIwM4t46d959K0m9XfYWqex9/sNVjnL6bGyI133ib3Pc1JUnjZpwo0eF5LdTCM+C4XbUyoa2pMCV6bsLWVnUHbSH6EoDCcIwS96mvq62tx/qCyKnu3NPcm8N72zGlhvxjdTYcX8rIJ0ftu/41MCxgsOeH9Zq22MO7IS5nAWbsJZgik2avehKcQCGRdMGecEs98rFvfNUYA47G/UJ2PMd+CfB2EOyyQwDNrgsg1viEtN9wwR1Lvt2wP3TdBbH25YCnF4nxSggVpXIRRhwyOhfAMu5u3u6D8NHjPEJnjNDACK8E3cslLhrKp5gF63ZWFQmic9q7mu4j5Q26zBLHHIxo2f1eWRkhQjanWncj/WOrVZGHkvDdCoRDw6XhpfQqkyAGBYrzwO8hKHn7gzr0Lq5r5R4Q+Q0JJfwrW8lPRWAzC/j3ULQYhvXLy/53WbR7bCLwH+cdZb8iLJsErpXZMneSQ6oEbsrWj36ekMes= cchan@LAPTOP-CUJ2SRN9"
 storage:
   files:
+    # CRI-O DNF module
+    - path: /etc/dnf/modules.d/cri-o.module
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: |
+          [cri-o]
+          name=cri-o
+          stream=1.17
+          profiles=
+          state=enabled
+    # YUM repository for kubeadm, kubelet and kubectl
+    - path: /etc/yum.repos.d/kubernetes.repo
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: |
+          [kubernetes]
+          name=Kubernetes
+          baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+          enabled=1
+          gpgcheck=1
+          repo_gpgcheck=1
+          gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
+            https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+    # configuring automatic loading of br_netfilter on startup
+    - path: /etc/modules-load.d/br_netfilter.conf
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: br_netfilter
+    # setting kernel parameters required by kubelet
+    - path: /etc/sysctl.d/kubernetes.conf
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: |
+          net.bridge.bridge-nf-call-iptables=1
+          net.ipv4.ip_forward=1
+
+
+
+
     - path: /etc/hostname
       overwrite: true
       contents:
@@ -21,10 +64,18 @@ storage:
         inline: |
           127.0.0.1       localhost
           ::1             localhost
+
+          # controlplane nodes
           192.168.56.11   master-1
           192.168.56.12   master-2
+          192.168.56.13   master-3
+
+          # worker node
           192.168.56.21   worker-1
           192.168.56.22   worker-2
+          192.168.56.23   worker-3
+
+          # 負載平衡器
           192.168.56.30   loadbalancer
     - path: /etc/sysctl.d/10-disable-ipv6.conf
       contents:
@@ -33,19 +84,9 @@ storage:
           net.ipv6.conf.all.disable_ipv6 = 1
           net.ipv6.conf.default.disable_ipv6 = 1
           net.ipv6.conf.enp0s4.disable_ipv6 = 1
-    - path: /etc/sysctl.d/99-kubernetes-cri.conf
-      contents:
-        inline: |
-          # Kernel parameters required by the cri-o container engine.
-          net.bridge.bridge-nf-call-iptables  = 1
-          net.ipv4.ip_forward                 = 1
-          #net.bridge.bridge-nf-call-ip6tables = 1
-    - path: /etc/modules-load.d/crio-net.conf
-      contents:
-        inline: |
-          # Kernel modules required by the cri-o container engine.
-          overlay
-          br_netfilter
+
+
+    # 設定 網卡
     - path: '/etc/NetworkManager/system-connections/Wired connection 1.nmconnection'
       mode: 0600
       contents:
@@ -82,7 +123,8 @@ storage:
           [ipv4]
           address1=172.17.56.11/24,172.17.56.1
           method=manual
+          
   links:
-    # 設定台北時間
+    # 設定時間(台北)
     - path: /etc/localtime
       target: ../usr/share/zoneinfo/Asia/Taipei
