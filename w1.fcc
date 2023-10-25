@@ -57,7 +57,7 @@ storage:
     - path: /etc/hostname
       overwrite: true
       contents:
-        inline: master-1
+        inline: worker-1
     - path: /etc/hosts
       overwrite: true
       contents:
