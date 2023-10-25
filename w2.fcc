@@ -57,7 +57,7 @@ storage:
     - path: /etc/hostname
       overwrite: true
       contents:
-        inline: worker-2
+        inline: master-1
     - path: /etc/hosts
       overwrite: true
       contents:
@@ -114,7 +114,7 @@ storage:
           interface-name=eth1
 
           [ipv4]
-          address1=192.168.56.22/24,192.168.56.1
+          address1=192.168.56.11/24,192.168.56.1
           method=manual
     - path: '/etc/NetworkManager/system-connections/Wired connection 3.nmconnection'
       mode: 0600
@@ -126,7 +126,7 @@ storage:
           interface-name=eth2
 
           [ipv4]
-          address1=172.17.56.22/24,172.17.56.1
+          address1=172.17.56.11/24,172.17.56.1
           method=manual
           
   links:
