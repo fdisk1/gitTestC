@@ -53,11 +53,13 @@ storage:
 
 
 
-
+    # 設定 hostname
     - path: /etc/hostname
       overwrite: true
       contents:
-        inline: master-1
+        inline: worker-2
+
+    # 設定 cluster 主機中的 nodes(共5台)
     - path: /etc/hosts
       overwrite: true
       contents:
@@ -66,17 +68,18 @@ storage:
           ::1             localhost
 
           # controlplane nodes
-          192.168.56.11   master-1
-          192.168.56.12   master-2
-          192.168.56.13   master-3
+          172.17.56.11   master-1
+          172.17.56.12   master-2
 
           # worker node
-          192.168.56.21   worker-1
-          192.168.56.22   worker-2
-          192.168.56.23   worker-3
-
-          # 負載平衡器
-          192.168.56.30   loadbalancer
+          # TODO: 與上述網段不同
+          172.17.56.21   worker-1
+          172.17.56.22   worker-2
+          
+          # ha 平衡器
+          # TODO: 與上述網段不同
+          172.17.56.30   loadbalancer
+          
     # 打開 IPv6
     # 雷坑: Thx, i fix it with:
     # 參考網址: https://github.com/cri-o/cri-o/issues/3555
@@ -88,7 +91,6 @@ storage:
           net.ipv6.conf.default.disable_ipv6 = 0
           net.ipv6.conf.eth0.disable_ipv6 = 0
           net.ipv6.conf.eth1.disable_ipv6 = 0
-          net.ipv6.conf.eth2.disable_ipv6 = 0
 
 
     # 設定 網卡
@@ -102,7 +104,6 @@ storage:
           interface-name=eth0
 
           [ipv4]
-          dns=172.29.32.1;8.8.8.8;8.8.4.4;
           method=auto
     - path: '/etc/NetworkManager/system-connections/Wired connection 2.nmconnection'
       mode: 0600
@@ -114,21 +115,9 @@ storage:
           interface-name=eth1
 
           [ipv4]
-          address1=192.168.56.11/24,192.168.56.1
+          address1=172.17.56.22/24
           method=manual
-    - path: '/etc/NetworkManager/system-connections/Wired connection 3.nmconnection'
-      mode: 0600
-      contents:
-        inline: |
-          [connection]
-          id=k8s-eth2
-          type=ethernet
-          interface-name=eth2
 
-          [ipv4]
-          address1=172.17.56.11/24,172.17.56.1
-          method=manual
-          
   links:
     # 設定時間(台北)
     - path: /etc/localtime

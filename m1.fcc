@@ -53,11 +53,13 @@ storage:
 
 
 
-
+    # 設定 hostname
     - path: /etc/hostname
       overwrite: true
       contents:
         inline: master-1
+
+    # 設定 cluster 主機中的 nodes(共5台)
     - path: /etc/hosts
       overwrite: true
       contents:
@@ -67,9 +69,17 @@ storage:
 
           # controlplane nodes
           172.17.56.11   master-1
+          172.17.56.12   master-2
 
           # worker node
+          # TODO: 與上述網段不同
           172.17.56.21   worker-1
+          172.17.56.22   worker-2
+          
+          # ha 平衡器
+          # TODO: 與上述網段不同
+          172.17.56.30   loadbalancer
+          
     # 打開 IPv6
     # 雷坑: Thx, i fix it with:
     # 參考網址: https://github.com/cri-o/cri-o/issues/3555
