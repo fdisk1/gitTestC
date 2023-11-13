@@ -2,6 +2,13 @@ variant: fcos
 version: 1.4.0
 passwd:
   users:
+    - name: k8s
+      groups:
+        - docker
+        - wheel
+        - sudo
+      ssh_authorized_keys:
+        - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDF2i8CY1Z8nTJErervMuyu3Ol0pmIIwM4t46d959K0m9XfYWqex9/sNVjnL6bGyI133ib3Pc1JUnjZpwo0eF5LdTCM+C4XbUyoa2pMCV6bsLWVnUHbSH6EoDCcIwS96mvq62tx/qCyKnu3NPcm8N72zGlhvxjdTYcX8rIJ0ftu/41MCxgsOeH9Zq22MO7IS5nAWbsJZgik2avehKcQCGRdMGecEs98rFvfNUYA47G/UJ2PMd+CfB2EOyyQwDNrgsg1viEtN9wwR1Lvt2wP3TdBbH25YCnF4nxSggVpXIRRhwyOhfAMu5u3u6D8NHjPEJnjNDACK8E3cslLhrKp5gF63ZWFQmic9q7mu4j5Q26zBLHHIxo2f1eWRkhQjanWncj/WOrVZGHkvDdCoRDw6XhpfQqkyAGBYrzwO8hKHn7gzr0Lq5r5R4Q+Q0JJfwrW8lPRWAzC/j3ULQYhvXLy/53WbR7bCLwH+cdZb8iLJsErpXZMneSQ6oEbsrWj36ekMes= cchan@LAPTOP-CUJ2SRN9"
     - name: core
       groups:
         - docker
@@ -86,7 +93,7 @@ storage:
     - path: /etc/sysctl.d/10-disable-ipv6.conf
       contents:
         inline: |
-          # disable IPv6
+          # enable IPv6
           net.ipv6.conf.all.disable_ipv6 = 0
           net.ipv6.conf.default.disable_ipv6 = 0
           net.ipv6.conf.eth0.disable_ipv6 = 0
