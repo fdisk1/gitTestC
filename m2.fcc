@@ -3,7 +3,11 @@ version: 1.5.0
 passwd:
   users:
     - name: core
-      ssh_authorized_keys:
+      groups:
+        - docker
+        - wheel
+        - sudo
+      ssh_authorized_keys_local:
         - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDCbycUY5fyT86cgQhBzONGVM/D5m5Qw6ZprkF3iB6N3Kx7H3Lf21WraI/MoVLwI+2l7P47sTJk9FfwauOHRdkzlEbWNqKbrq7RPuKgET8AFl0J1KnEpauKqbcyGPfzzPq5JWSFZNTtxSYq3yPuAL8P/VNwk4sJLgGW3irUoCQxeS/H2VRzSgebJ/3dH6rnZUK1ydq7qb9JZ5lVpdEAKnvtq8fn+QbzwJ5u5bQ1p7mCGDWKXSauJa2hZaKrjch9VRYzm1BRnPwPdWUkZgXpoM56/XYVj3j3iEaquffCgEe9RPrAaW8jQ4oR0CpgECEkfFlFF+RI2LDvAokWws32GKbSFOf5hwj795A3G54t/AkzH6qYsExDIG1UFCYzWS+htL3clQzK7bzgzV8CgCxaEjoZIXZ7OcNDjdwdtJXuYPALaKK9Mokx1VTh9FEQktn2DlVswUisNLQsDSYd+58s+He6sFRPDa/jPBcu1w++1GEUV/M0O9h6FttuaPEdz31DID8= cchan@MSI"
 storage:
   files:
