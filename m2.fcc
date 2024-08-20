@@ -3,122 +3,64 @@ version: 1.5.0
 passwd:
   users:
     - name: core
-      groups:
-        - docker
-        - wheel
-        - sudo
       ssh_authorized_keys_local:
         - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDCbycUY5fyT86cgQhBzONGVM/D5m5Qw6ZprkF3iB6N3Kx7H3Lf21WraI/MoVLwI+2l7P47sTJk9FfwauOHRdkzlEbWNqKbrq7RPuKgET8AFl0J1KnEpauKqbcyGPfzzPq5JWSFZNTtxSYq3yPuAL8P/VNwk4sJLgGW3irUoCQxeS/H2VRzSgebJ/3dH6rnZUK1ydq7qb9JZ5lVpdEAKnvtq8fn+QbzwJ5u5bQ1p7mCGDWKXSauJa2hZaKrjch9VRYzm1BRnPwPdWUkZgXpoM56/XYVj3j3iEaquffCgEe9RPrAaW8jQ4oR0CpgECEkfFlFF+RI2LDvAokWws32GKbSFOf5hwj795A3G54t/AkzH6qYsExDIG1UFCYzWS+htL3clQzK7bzgzV8CgCxaEjoZIXZ7OcNDjdwdtJXuYPALaKK9Mokx1VTh9FEQktn2DlVswUisNLQsDSYd+58s+He6sFRPDa/jPBcu1w++1GEUV/M0O9h6FttuaPEdz31DID8= cchan@MSI"
+systemd:
+  units:
+    - name: serial-getty@ttyS0.service
+      dropins:
+      - name: autologin-core.conf
+        contents: |
+          [Service]
+          # Override Execstart in main unit
+          ExecStart=
+          # Add new Execstart with `-` prefix to ignore failure
+          ExecStart=-/usr/sbin/agetty --autologin core --noclear %I $TERM
+          TTYVTDisallocate=no
+    - name: failure.service
+      enabled: true
+      contents: |
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/false
+        RemainAfterExit=yes
+
+        [Install]
+        WantedBy=multi-user.target
 storage:
   files:
-    # CRI-O DNF module
-    - path: /etc/dnf/modules.d/cri-o.module
-      mode: 0644
-      overwrite: true
-      contents:
-        inline: |
-          [cri-o]
-          name=cri-o
-          stream=1.17
-          profiles=
-          state=enabled
-    # YUM repository for kubeadm, kubelet and kubectl
-    - path: /etc/yum.repos.d/kubernetes.repo
-      mode: 0644
-      overwrite: true
-      contents:
-        inline: |
-          [kubernetes]
-          name=Kubernetes
-          baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
-          enabled=1
-          gpgcheck=1
-          repo_gpgcheck=1
-          gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
-            https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-    # configuring automatic loading of br_netfilter on startup
-    - path: /etc/modules-load.d/br_netfilter.conf
-      mode: 0644
-      overwrite: true
-      contents:
-        inline: br_netfilter
-    # setting kernel parameters required by kubelet
-    - path: /etc/sysctl.d/kubernetes.conf
-      mode: 0644
-      overwrite: true
-      contents:
-        inline: |
-          net.bridge.bridge-nf-call-iptables=1
-          net.ipv4.ip_forward=1
-
-
-
-    # 設定 hostname
     - path: /etc/hostname
-      overwrite: true
-      contents:
-        inline: master-2
-
-    # 設定 cluster 主機中的 nodes(共5台)
-    - path: /etc/hosts
-      overwrite: true
+      mode: 0644
       contents:
         inline: |
-          127.0.0.1       localhost
-          ::1             localhost
-
-          # controlplane nodes
-          172.17.56.11   master-1
-          172.17.56.12   master-2
-
-          # worker node
-          # TODO: 與上述網段不同
-          172.17.56.21   worker-1
-          172.17.56.22   worker-2
-          
-          # ha 平衡器
-          # TODO: 與上述網段不同
-          172.17.56.30   loadbalancer
-          
-    # 打開 IPv6
-    # 雷坑: Thx, i fix it with:
-    # 參考網址: https://github.com/cri-o/cri-o/issues/3555
-    - path: /etc/sysctl.d/10-disable-ipv6.conf
+          tutorial
+    - path: /etc/profile.d/systemd-pager.sh
+      mode: 0644
       contents:
         inline: |
-          # disable IPv6
-          net.ipv6.conf.all.disable_ipv6 = 0
-          net.ipv6.conf.default.disable_ipv6 = 0
-          net.ipv6.conf.eth0.disable_ipv6 = 0
-          net.ipv6.conf.eth1.disable_ipv6 = 0
-
-
-    # 設定 網卡
-    - path: '/etc/NetworkManager/system-connections/Wired connection 1.nmconnection'
-      mode: 0600
+          # Tell systemd to not use a pager when printing information
+          export SYSTEMD_PAGER=cat
+    - path: /etc/containers/systemd/etcd-member.container
+      mode: 0644
       contents:
         inline: |
-          [connection]
-          id=k8s-eth0
-          type=ethernet
-          interface-name=eth0
+          [Unit]
+          Description=Run a single node etcd
+          After=network-online.target
+          Wants=network-online.target
 
-          [ipv4]
-          method=auto
-    - path: '/etc/NetworkManager/system-connections/Wired connection 2.nmconnection'
-      mode: 0600
-      contents:
-        inline: |
-          [connection]
-          id=k8s-eth1
-          type=ethernet
-          interface-name=eth1
+          [Container]
+          ContainerName=etcd
+          Image=quay.io/coreos/etcd:latest
+          Network=host
+          Volume=etcd-data:/etcd-data
+          Exec=/usr/local/bin/etcd                                \
+              --name node1 --data-dir /etcd-data                  \
+              --initial-advertise-peer-urls http://127.0.0.1:2380 \
+              --listen-peer-urls http://127.0.0.1:2380            \
+              --advertise-client-urls http://127.0.0.1:2379       \
+              --listen-client-urls http://127.0.0.1:2379          \
+              --initial-cluster node1=http://127.0.0.1:2380
 
-          [ipv4]
-          address1=172.17.56.12/24
-          method=manual
-
-  links:
-    # 設定時間(台北)
-    - path: /etc/localtime
-      target: ../usr/share/zoneinfo/Asia/Taipei
+          [Install]
+          WantedBy=multi-user.target
